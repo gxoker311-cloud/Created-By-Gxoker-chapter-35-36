@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HRDK UBT - READING TEST (20 Qs)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Pyidaungsu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', 'Pyidaungsu', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            color: #1e293b; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 12px; user-select: none;
+        }
+        .ubt-card { 
+            background: #ffffff; border-radius: 20px; width: 100%; max-width: 460px; border: 1px solid #cbd5e1;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 20px 40px rgba(0, 0, 0, 0.05); overflow: hidden; display: flex; flex-direction: column; position: relative; 
+        }
+        .ubt-top-banner {
+            background: #1e3a8a; color: #ffffff; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 800;
+        }
+        .header-logo { height: 28px; width: auto; object-fit: contain; background: #ffffff; padding: 2px 6px; border-radius: 4px; }
+        .header-title-text { text-align: center; letter-spacing: 0.5px; flex-grow: 1; font-size: 0.78rem; }
+        .header-banner img { width: 100%; height: auto; display: block; }
+        .title-container { padding: 12px 20px 4px 20px; text-align: center; }
+        .title-text { font-size: 0.85rem; font-weight: 800; line-height: 1.4; color: #475569; }
+        .login-bottom-logos {
+            display: flex; justify-content: center; align-items: center; gap: 15px; padding: 5px 20px 15px 20px; border-bottom: 1px solid #f1f5f9; margin-bottom: 5px;
+        }
+        .login-bottom-logos img { height: 32px; width: auto; object-fit: contain; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; padding: 2px; }
+        #welcome-screen, #exam-ui, #result-screen, #review-screen { width: 100%; display: none; }
+        #welcome-screen { display: block; }
+        .input-group { padding: 8px 20px 10px 20px; }
+        .info-label { font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
+        .form-input, .form-select { 
+            width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.9rem; font-weight: 700; color: #0f172a; outline: none; background: #f8fafc; transition: all 0.2s;
+        }
+        .form-input:focus, .form-select:focus { border-color: #2563eb; background: #ffffff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .action-container { padding: 10px 20px 24px 20px; }
+        .btn-confirm { 
+            width: 100%; padding: 14px; border: none; border-radius: 12px; background: #16a34a; color: #ffffff; font-size: 0.95rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+        }
+        .btn-confirm:hover { background: #15803d; }
+        #exam-ui { padding: 16px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: #1e3a8a; color: #ffffff; padding: 10px 16px; border-radius: 10px; margin-bottom: 8px; font-size: 11px; font-weight: 800; }
+        
+        /* ရထားတွဲလို ဖြေးဖြေးချင်း ရွေ့သွားသော စာတန်း (Marquee Effect) အတွက် CSS */
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 6px 0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 14s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        .timer-badge { padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 900; background: rgba(255, 255, 255, 0.2); }
+        .progress-box { width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 100%; background: #2563eb; transition: width 1s linear; }
+        .q-palette { display: flex; gap: 4px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+        .q-dot { width: 26px; height: 26px; border-radius: 6px; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 800; cursor: pointer; background: #fff; color: #64748b; }
+        .q-dot.active { border-color: #2563eb; background: #2563eb; color: #ffffff; }
+        .q-dot.done { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+        .q-text { font-size: 13.5px; font-weight: 700; margin-bottom: 14px; line-height: 1.6; background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; color: #0f172a; white-space: pre-line; position: relative; }
+        .watermark { position: absolute; top: 10px; right: 10px; width: 50px; height: 50px; border-radius: 50%; opacity: 0.15; pointer-events: none; }
+        .exam-img-wrap { text-align: center; margin-bottom: 10px; }
+        .exam-img { width: 100%; max-height: 160px; object-fit: contain; border-radius: 8px; cursor: zoom-in; border: 1px solid #cbd5e1; background: #fff; }
+        .img-hint { font-size: 10px; color: #0284c7; font-weight: 800; margin-top: 3px; }
+        #img-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 9999; justify-content: center; align-items: center; padding: 20px; cursor: zoom-out;
+        }
+        #img-modal img { max-width: 95%; max-height: 90vh; border-radius: 8px; }
+        .answer-zone { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+        .opt-item { background: #fff; border: 1.5px solid #cbd5e1; padding: 12px 14px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; font-size: 12.5px; font-weight: 700; transition: all 0.15s ease; }
+        .opt-item:hover { border-color: #2563eb; background: #f0fdfa; }
+        .opt-item.active { background: #eff6ff; border-color: #2563eb; color: #1d4ed8; font-weight: 800; }
+        .opt-num { width: 22px; height: 22px; border: 1.5px solid currentColor; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 11px; flex-shrink: 0; }
+        .nav-controls { display: flex; gap: 8px; margin-bottom: 10px; }
+        .btn-nav { flex: 1; padding: 11px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .btn-submit { background: #1e3a8a; color: #ffffff; border: none; padding: 13px; border-radius: 10px; font-size: 13px; font-weight: 900; cursor: pointer; width: 100%; }
+        .result-hud { padding: 16px 20px; display: flex; flex-direction: column; align-items: center; }
+        .final-res-title { font-size: 1.2rem; font-weight: 900; color: #1e3a8a; margin-bottom: 12px; letter-spacing: 1px; }
+        .res-table { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+        .res-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12.5px; font-weight: 700; border-bottom: 1px dashed #cbd5e1; }
+        .res-row:last-child { border-bottom: none; }
+        .res-label { color: #64748b; } .res-val { color: #0f172a; font-weight: 800; }
+        .score-circle { width: 90px; height: 90px; border-radius: 50%; background: #eff6ff; border: 4px solid #2563eb; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .score-num { font-size: 1.4rem; font-weight: 900; color: #1d4ed8; line-height: 1; }
+        .score-lbl { font-size: 0.6rem; font-weight: 800; color: #64748b; margin-top: 2px; }
+        .res-action-grid { display: flex; gap: 8px; width: 100%; }
+        .btn-compact-res { flex: 1; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: 900; cursor: pointer; text-align: center; border: none; }
+        .btn-review-mini { background: #1e3a8a; color: #ffffff; width: 100%; }
+        .btn-restart-mini { background: #2563eb; color: #ffffff; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="img-modal" onclick="closeImageModal()">
+        <img id="modal-img-element" src="" alt="Zoomed Image">
+    </div>
+
+    <div class="ubt-card">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen">
+            <div class="ubt-top-banner">
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo">
+                <span class="header-title-text">HRDK UBT - READING TEST </span>
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo">
+            </div>
+            <div class="header-banner"><img src="https://i.imgur.com/fq28vPm.jpeg" alt="Banner"></div>
+            <div class="title-container"><div class="title-text">Created By Gxoker EPS-TOPIK စာမေးပွဲ</div></div>
+            <div class="login-bottom-logos">
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker">
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker">
+            </div>
+            <div class="input-group">
+                <div class="info-label">NAME (အမည်)</div>
+                <input type="text" id="username-field" class="form-input" placeholder="သင့်နာမည်..." autocomplete="off">
+            </div>
+            <div class="input-group">
+                <div class="info-label">PASSPORT (နိုင်ငံကူးလက်မှတ်)</div>
+                <input type="text" id="passport-field" class="form-input" placeholder="ဥပမာ- MH-3568**" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <div class="info-label">SECTOR (လုပ်ငန်းခွင်)</div>
+                <select id="sector-field" class="form-select">
+                    <option value="Manufacturing (제조업)">Manufacturing (제조업) - ထုတ်လုပ်ရေး</option>
+                    <option value="Agriculture (농축산업)">Agriculture (농축산업) - စိုက်ပျိုးမွေးမြူရေး</option>
+                    <option value="Construction (건설업)">Construction (건설업) - ဆောက်လုပ်ရေး</option>
+                    <option value="Fishery (어업)">Fishery (어업) - ရေလုပ်ငန်း</option>
+                    <option value="Service (서비스업)">Service (서비스업) - ဝန်ဆောင်မှုလုပ်ငန်း</option>
+                </select>
+            </div>
+            <div class="action-container"><button class="btn-confirm" onclick="triggerExam()">CONFIRM & START</button></div>
+        </div>
+
+        <!-- Exam UI -->
+        <div id="exam-ui">
+            <div class="ubt-top-banner" style="margin-bottom: 6px; border-radius: 8px;">
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo">
+                <span class="header-title-text">HRDK UBT READING EXAM</span>
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo">
+            </div>
+            
+            <!-- ရထားတွဲလို ဖြေးဖြေးချင်း ရွေ့သွားသော စာတန်း -->
+            <div class="marquee-container">
+                <div class="marquee-text">✨ Created By Gxoker စနစ်သစ်မေးခွန်းအတန်း - HRDK EPS-TOPIK UBT Reading Examination ✨</div>
+            </div>
+
+            <div class="top-bar">
+                <div id="header-user-info">User | Sector</div>
+                <div class="timer-badge">⏱️ <span id="timer">20:00</span></div>
+            </div>
+            <div class="progress-box"><div class="progress-fill" id="p-bar"></div></div>
+            <div class="q-palette" id="palette"></div>
+            <div class="q-text" id="q-text">Loading...</div>
+            <div class="answer-zone" id="ans-list"></div>
+            <div class="nav-controls">
+                <button class="btn-nav" onclick="prevQ()">‹ ရှေ့သို့</button>
+                <button class="btn-nav" onclick="nextQ()">နောက်သို့ ›</button>
+            </div>
+            <button class="btn-submit" onclick="finishExam()">SUBMIT (အဖြေတင်သွင်းမည်)</button>
+        </div>
+
+        <!-- Result Screen (Gxoker Logo အထင်အရှားပါဝင်သော စာမျက်နှာ) -->
+        <div id="result-screen">
+            <div class="ubt-top-banner">
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo" style="height:35px; border-radius:8px;">
+                <span class="header-title-text" style="font-size: 0.95rem; font-weight: 900;">CREATED BY GXOKER</span>
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo" style="height:35px; border-radius:8px;">
+            </div>
+            <div class="result-hud">
+                <div class="final-res-title">EXAM RESULT SUMMARY</div>
+                <div class="score-circle">
+                    <div class="score-num" id="res-score">0</div>
+                    <div class="score-lbl">မှတ် (100)</div>
+                </div>
+                <div class="res-table">
+                    <div class="res-row"><span class="res-label">အမည် (Name):</span><span class="res-val" id="res-name">-</span></div>
+                    <div class="res-row"><span class="res-label">Passport:</span><span class="res-val" id="res-passport">-</span></div>
+                    <div class="res-row"><span class="res-label">Sector:</span><span class="res-val" id="res-sector">-</span></div>
+                    <div class="res-row"><span class="res-label">အမှန် (Correct):</span><span class="res-val" id="res-acc">0 / 20</span></div>
+                    <div class="res-row"><span class="res-label">ကြာမြင့်ချိန်:</span><span class="res-val" id="res-time">00:00</span></div>
+                </div>
+                <div class="res-action-grid">
+                    <button class="btn-compact-res btn-review-mini" onclick="showReview()">🔍 အဖြေစစ်ရန်</button>
+                </div>
+                <div class="res-action-grid" style="margin-top: 8px;">
+                    <button class="btn-compact-res btn-restart-mini" onclick="location.reload()">🔄 ပြန်လည်ဖြေဆိုရန်</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Screen -->
+        <div id="review-screen">
+            <div class="ubt-top-banner">
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo">
+                <span class="header-title-text">Created By Gxoker - REVIEW MODE</span>
+                <img src="https://i.imgur.com/WA5hd3D.jpeg" alt="Gxoker Logo" class="header-logo">
+            </div>
+            <div id="review-content" style="padding: 12px; max-height: 70vh; overflow-y: auto;"></div>
+            <div class="action-container" style="padding: 10px 12px 12px 12px;"><button class="btn-submit" onclick="closeReview()">ရလဒ်စာရွက်သို့ ပြန်သွားမည်</button></div>
+        </div>
+    </div>
+        <script>
+    const allQuestions = [
+        {
+            q: "[1 ~ 3] 다음 그림을 보고 맞는 문장을 고르십시오.\n\n1. <div class='exam-img-wrap'><img src='https://i.imgur.com/Pj7AWmn.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["상자를 꼼꼼하게 포장하고 있습니다.", "무거운 상자를 높이 쌓고 있습니다.", "상자를 테이프로 밀봉하고 있습니다.", "상자에 배송 라벨을 붙이고 있습니다."], c: 3
+        },
+        {
+            q: "2. <div class='exam-img-wrap'><img src='https://i.imgur.com/0jNN2wK.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["트럭에 물건을 싣고 있습니다.", "지게차로 자재를 운반하고 있습니다.", "창고에서 물품을 검수하고 있습니다.", "화물을 트럭에서 내리고 있습니다."], c: 0
+        },
+        {
+            q: "3. <div class='exam-img-wrap'><img src='https://i.imgur.com/GzkHFWf.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["작업장이 깨끗하게 정돈되어 있습니다.", "환풍기를 켜서 환기를 시키고 있습니다.", "바닥을 깨끗이 쓸고 닦고 있습니다.", "쓰레기를 분리하여 버리고 있습니다."], c: 3
+        },
+        {
+            q: "[4 ~ 5] 다음 표지나 기준서를 보고 알맞은 것을 고르십시오.\n\n4. <div class='exam-img-wrap'><img src='https://i.imgur.com/XWmQ7tE.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["지게차를 운전하면 안 됩니다.", "차량에 너무 많은 짐을 실으면 안 됩니다.", "물품을 상자에 포장하면 안 됩니다.", "창고 내부에 외부인이 들어가면 안 됩니다."], c: 1
+        },
+        {
+            q: "5. <div class='exam-img-wrap'><img src='https://i.imgur.com/7qvFykN.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["골판지보다 비닐의 수량이 더 많습니다.", "외부 포장 재료로 비닐을 사용해야 합니다.", "내부와 외부 포장 제품의 크기는 완전히 같습니다.", "포장 기준서에 따라 올바르게 자재를 포장해야 합니다."], c: 3
+        },
+        {
+            q: "[6 ~ 8] 다음 문장 중 밑줄 친 부분이 맞는 문장을 고르십시오.\n\n6. ① 냉장 창고의 온도를 덮어요.\n② 포장한 상자에 라벨을 붙여요.\n③ 드릴을 사용해서 구멍을 박아요.\n④ 날씨가 좋으면 콘크리트를 조립해요.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["냉장 창고의 온도를 덮어요.", "포장한 상자에 라벨을 붙여요.", "드릴을 사용해서 구멍을 박아요.", "날씨가 좋으면 콘크리트를 조립해요."], c: 1
+        },
+        {
+            q: "7. 다음 단어와 비슷한 말을 고르십시오.\n\n[ 출하하다 ]\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["입고하다", "납품하다", "적재하다", "내보내다"], c: 3
+        },
+        {
+            q: "8. 다음 내용과 반대되는 뜻을 가진 말을 고르십시오.\n\n[ 덮개를 덮다 ]\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["벗기다", "유지하다", "파악하다", "저장하다"], c: 0
+        },
+        {
+            q: "[9 ~ 10] 다음 안내문이나 표를 보고 내용과 같은 것을 고르십시오.\n\n9. 다음 [오늘 해야 할 일 일정표]에 대한 설명으로 맞는 것은 무엇입니까?\n\n<div class='exam-img-wrap'><img src='https://i.imgur.com/hXd00GU.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["재료의 수량 점검을 가장 먼저 해야 합니다.", "출하 목록을 정돈한 후에 일을 최종 마무리합니다.", "작업 일정표를 작성하는 데 20분 정도 소요됩니다.", "품질 검사보다 장비 점검에 시간이 더 오래 걸립니다."], c: 1
+        },
+        {
+            q: "10. 다음 [월별 제품 수출량 통계 그래프]를 보고 맞는 것을 고르십시오.\n\n<div class='exam-img-wrap'><img src='https://i.imgur.com/UFcxcnX.jpeg' class='exam-img' onclick='openImageModal(this.src)'><div class='img-hint'>🔍 (ပုံကိုနှိပ်၍ ချဲ့ကြည့်နိုင်သည်)</div></div><img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["5월과 6월의 수출량 수치는 서로 완벽하게 같습니다.", "4월은 한 해 중 수출량이 가장 많았던 달입니다.", "3월 이후부터는 수출량이 계속해서 줄어들었습니다.", "자동차 수출량이 1월부터 4월까지 꾸준히 감소했습니다."], c: 1
+        },
+        {
+            q: "[11 ~ 14] 빈칸에 들어갈 가장 알맞은 것을 고르십시오.\n\n11. 가: 오늘은 거래처 주문 물량이 좀 많네요.\n나: 네, 완제품 상자를 지게차로 화물차에 ______ 빠를 거예요.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["실으면", "실어도", "검수해야", "검수하면"], c: 0
+        },
+        {
+            q: "12. 작업장 주변을 항상 쓸고 닦으며 청결을 유지하면 작업장을 ______ 만들 수 있습니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["더럽게", "쾌적하게", "더럽지만", "쾌적하지만"], c: 1
+        },
+        {
+            q: "13. 처음으로 페인트 도색 작업을 할 때 냄새가 심하고 답답해서 환풍기를 ______ 환기를 시켰습니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["꺼서", "갈고", "돌리고", "열어서"], c: 2
+        },
+        {
+            q: "14. 자재 창고를 관리할 때는 고가의 원부자재나 물품이 ______ 않도록 정기적으로 재고를 파악하는 것이 중요합니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["정리하지", "관리하지", "보관하지", "부족하지"], c: 3
+        },
+        {
+            q: "[15 ~ 16] 다음은 무엇에 대한 설명인지 고르십시오.\n\n15. 회사가 완제품을 제조한 후 이를 고객이나 거래처에 약속된 일정 시간 안에 안전하게 전달하는 행위를 말합니다. 생산된 물건을 소비자에게 최종적으로 제공해 주는 유통 활동을 의미합니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["납품하다", "적재하다", "교환하다", "생산하다"], c: 0
+        },
+        {
+            q: "16. 어떤 일이든 현장 업무에 무거운 책임을 지고 있는 사람입니다. 회사나 기관 내에서 특정 실무 업무를 맡아서 처리하는 사람을 말하며, 다른 방문객들의 문의나 요청 사항을 친절하게 해결해 주는 역할을 합니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["여행사", "상담사", "관리자", "경비원"], c: 2
+        },
+        {
+            q: "[17 ~ 18] 다음 글을 읽고 무엇에 대한 글인지 고르십시오.\n\n17. 제조된 제품은 크기, 무게, 용도, 또는 파손 여부 등 물리적 특성에 따라 세부적으로 구분할 수 있습니다. 창고 내에서의 깔끔한 정리 및 정확한 재고 관리뿐만 아니라 물류 운송 시 안전을 지키는 데도 매우 중요한 역할을 합니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["체계적인 제품 분류 및 포장 방법", "대형 창고 관리 자동화 시스템", "제품 제조 공정 품질 검사 절차", "물류 화물 운송의 경제적 중요성"], c: 0
+        },
+        {
+            q: "18. 작업장의 환경 관리는 현장 근로자의 건강과 안전을 지키고 생산성을 높이는 데 핵심적인 역할을 합니다. 환기 시설을 적절히 설치하고 작업 공간을 항상 정돈하며 소음과 조명을 알맞게 조절하는 것이 필요합니다. 또한 유해 화학물질 관리와 개인 안전 보호구 착용도 필수적입니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["공장 기계 설비 유지보수 방법", "작업장 내부 인테리어 디자인 양식", "작업장 환경 관리의 중요성과 수칙", "외국인 근로자 신규 직원 교육 프로그램"], c: 2
+        },
+        {
+            q: "[19 ~ 20] 다음 글을 읽고 내용과 같은 것을 고르십시오.\n\n19. 한국의 산업 구조는 과거 농업과 경공업 중심에서 빠르게 변화해 왔습니다. 현재는 정보통신기술(ICT), 반도체, 바이오 등 첨단 고부가가치 산업이 크게 성장하면서 경제 체질이 완전히 탈바꿈했습니다. 특히 반도체 산업은 한국의 핵심 수출 품목으로 자리 잡으며 세계 글로벌 시장에서도 매우 큰 경제적 비중을 차지하고 있습니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["정보통신기술(ICT) 산업의 비중은 최근 들어 점점 줄어들고 있습니다.", "요즘 한국에서는 여전히 전통 농업이 가장 중요한 산업입니다.", "한국의 경제 산업 구조는 과거와 비교해 크게 달라지지 않았습니다.", "한국의 반도체 산업은 세계 해외 시장에서도 큰 비중을 차지합니다."], c: 3
+        },
+        {
+            q: "20. 한국은 부족한 내수시장을 보완하고 경제 성장을 이루기 위해 오랫동안 수출 중심의 무역 정책을 추진해 왔습니다. 주요 수입 품목으로는 원유, 천연가스, 철강 원자재 등이 있으며, 수출 품목으로는 반도체, 스마트폰, 자동차, 석유화학 제품 등이 있습니다. 또한 자유무역협정(FTA)을 적극적으로 체결하여 글로벌 시장 경쟁력을 강화하고 있으며, 중국, 미국, 일본, 베트남 등 파트너국과의 수출 다변화를 위해 노력하고 있습니다.\n<img src='https://i.imgur.com/WA5hd3D.jpeg' class='watermark'>",
+            a: ["한국의 주요 수출 품목은 공산품 대신 신선한 농산물과 식료품이 많습니다.", "한국은 국내에 천연자원이 부족하기 때문에 해외로부터 자원을 수입합니다.", "한국의 주요 수입 품목에는 첨단 전자제품과 완성차 자동차가 포함됩니다.", "자유무역협정(FTA)을 체결하면 국가 간 무역 장벽이 더 높아지게 됩니다."], c: 1
+        }
+    ];
+          let currentIndex = 0;
+    let userAns = [];
+    let studentName = "";
+    let studentPassport = "";
+    let studentSector = "";
+    let totalSeconds = 20 * 60;
+    let initialSeconds = totalSeconds;
+    let timerInterval = null;
+
+    function triggerExam() {
+        const nameInput = document.getElementById("username-field").value.trim();
+        const passportInput = document.getElementById("passport-field").value.trim();
+        const sectorInput = document.getElementById("sector-field").value;
+
+        if (!nameInput || !passportInput) {
+            alert("ကျေးဇူးပြု၍ နာမည်နှင့် Passport ကို ထည့်သွင်းပေးပါ။");
+            return;
+        }
+
+        studentName = nameInput;
+        studentPassport = passportInput;
+        studentSector = sectorInput;
+        userAns = Array(allQuestions.length).fill(null);
+
+        document.getElementById("welcome-screen").style.display = "none";
+        document.getElementById("exam-ui").style.display = "block";
+        
+        document.getElementById("header-user-info").textContent = `${studentName} | ${sectorInput.split(' ')[0]}`;
+
+        renderPalette();
+        loadQuestion(0);
+        startTimer();
+    }
+
+    function startTimer() {
+        const tEl = document.getElementById("timer");
+        timerInterval = setInterval(() => {
+            totalSeconds--;
+            let mins = Math.floor(totalSeconds / 60);
+            let secs = totalSeconds % 60;
+            tEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            let percent = (totalSeconds / initialSeconds) * 100;
+            document.getElementById("p-bar").style.width = percent + "%";
+
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                finishExam();
+            }
+        }, 1000);
+    }
+
+    function renderPalette() {
+        const pal = document.getElementById("palette");
+        pal.innerHTML = "";
+        allQuestions.forEach((_, idx) => {
+            const dot = document.createElement("div");
+            dot.className = `q-dot ${idx === currentIndex ? 'active' : ''} ${userAns[idx] !== null ? 'done' : ''}`;
+            dot.textContent = idx + 1;
+            dot.onclick = () => loadQuestion(idx);
+            pal.appendChild(dot);
+        });
+    }
+
+    function loadQuestion(idx) {
+        currentIndex = idx;
+        document.getElementById("q-text").innerHTML = allQuestions[currentIndex].q;
+
+        const ansList = document.getElementById("ans-list");
+        ansList.innerHTML = "";
+        allQuestions[currentIndex].a.forEach((opt, optIdx) => {
+            const item = document.createElement("div");
+            item.className = `opt-item ${userAns[currentIndex] === optIdx ? 'active' : ''}`;
+            item.innerHTML = `<span class="opt-num">${optIdx + 1}</span> <span>${opt}</span>`;
+            item.onclick = () => selectOption(optIdx);
+            ansList.appendChild(item);
+        });
+        renderPalette();
+    }
+
+    function selectOption(optIdx) {
+        userAns[currentIndex] = optIdx;
+        loadQuestion(currentIndex);
+    }
+
+    function prevQ() { if (currentIndex > 0) loadQuestion(currentIndex - 1); }
+    function nextQ() { if (currentIndex < allQuestions.length - 1) loadQuestion(currentIndex + 1); }
+
+    function openImageModal(imgSrc) {
+        const modal = document.getElementById("img-modal");
+        document.getElementById("modal-img-element").src = imgSrc;
+        modal.style.display = "flex";
+    }
+
+    function closeImageModal() {
+        document.getElementById("img-modal").style.display = "none";
+    }
+
+    function finishExam() {
+        let answeredCount = userAns.filter(ans => ans !== null).length;
+        if (answeredCount < allQuestions.length) {
+            if (!confirm(`မဖြေရသေးသော မေးခွန်းများ ကျန်ရှိနေပါသည်။ တင်သွင်းရန် သေချာပါသလား?`)) return;
+        }
+
+        clearInterval(timerInterval);
+        
+        let correctCount = 0;
+        allQuestions.forEach((item, i) => {
+            if (userAns[i] === item.c) correctCount++;
+        });
+
+        const finalScore = correctCount * 5;
+        
+        const timeUsedSec = initialSeconds - totalSeconds;
+        const usedMins = Math.floor(timeUsedSec / 60);
+        const usedSecs = timeUsedSec % 60;
+        const timeStr = `${usedMins.toString().padStart(2, '0')}m ${usedSecs.toString().padStart(2, '0')}s`;
+
+        document.getElementById("exam-ui").style.display = "none";
+        document.getElementById("result-screen").style.display = "block";
+        
+        document.getElementById("res-score").textContent = finalScore;
+        document.getElementById("res-name").textContent = studentName;
+        document.getElementById("res-passport").textContent = studentPassport;
+        document.getElementById("res-sector").textContent = studentSector;
+        document.getElementById("res-acc").textContent = `${correctCount} / 20 (${finalScore} မှတ်)`;
+        document.getElementById("res-time").textContent = timeStr;
+    }
+
+    function showReview() {
+        document.getElementById("result-screen").style.display = "none";
+        const reviewContainer = document.getElementById("review-screen");
+        const reviewContent = document.getElementById("review-content");
+        reviewContent.innerHTML = "";
+
+        allQuestions.forEach((item, idx) => {
+            const userPick = userAns[idx];
+            const isCorrect = userPick === item.c;
+            const card = document.createElement("div");
+            card.className = "review-card";
+            card.style.background = "#f8fafc";
+            card.style.border = "1px solid #e2e8f0";
+            card.style.borderRadius = "12px";
+            card.style.padding = "12px";
+            card.style.marginBottom = "10px";
+
+            let optsHTML = "";
+            item.a.forEach((opt, optIdx) => {
+                let optStyle = "padding:6px 10px; border-radius:6px; font-size:11px; margin-bottom:3px; display:flex; justify-content:space-between; border:1px solid #e2e8f0; background:#fff;";
+                let badge = "";
+                if (optIdx === item.c) {
+                    optStyle += " background:#dcfce7; border-color:#22c55e; color:#15803d; font-weight:800;";
+                    badge = `<span style="background:#22c55e; color:#fff; font-size:9px; padding:2px 5px; border-radius:4px;">အဖြေမှန်</span>`;
+                } else if (optIdx === userPick && !isCorrect) {
+                    optStyle += " background:#fee2e2; border-color:#ef4444; color:#b91c1c; font-weight:800;";
+                    badge = `<span style="background:#ef4444; color:#fff; font-size:9px; padding:2px 5px; border-radius:4px;">သင့်အဖြေ</span>`;
+                }
+                optsHTML += `<div style="${optStyle}"><span>${optIdx + 1}. ${opt}</span>${badge}</div>`;
+            });
+
+            card.innerHTML = `
+                <div style="font-size:12px; font-weight:700; color:#0f172a; margin-bottom:6px;">မေးခွန်း ${idx + 1} (5 မှတ်)။<br>${item.q}</div>
+                <div>${optsHTML}</div>
+            `;
+            reviewContent.appendChild(card);
+        });
+        reviewContainer.style.display = "block";
+    }
+
+    function closeReview() {
+        document.getElementById("review-screen").style.display = "none";
+        document.getElementById("result-screen").style.display = "block";
+    }
+    </script>
+</body>
+</html>
